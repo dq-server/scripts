@@ -27,7 +27,7 @@ cd ~/overviewer
 wget -O config.tar.gz https://github.com/dq-server/overviewer-config/tarball/master
 tar xvzf config.tar.gz
 rm config.tar.gz
-mv deltaidea-overviewer-config* config
+mv dq-server-overviewer-config* config
 
 echo "Rendering the map..."
 mv ~/previous-render ~/overviewer/map
