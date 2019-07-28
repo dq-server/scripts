@@ -1,0 +1,14 @@
+[Unit]
+Description=Minecraft server
+
+[Service]
+Type=oneshot
+User=ec2-user
+Group=ec2-user
+ExecStart=/home/ec2-user/scripts/minecraft_start.sh
+ExecStop=/home/ec2-user/scripts/minecraft_stop.sh
+RemainAfterExit=yes
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

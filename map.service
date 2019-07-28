@@ -1,0 +1,13 @@
+[Unit]
+Description=Overviewer map
+
+[Service]
+Type=oneshot
+User=ec2-user
+Group=ec2-user
+ExecStart=/home/ec2-user/scripts/map_start.sh
+ExecStop=/home/ec2-user/scripts/map_stop.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
