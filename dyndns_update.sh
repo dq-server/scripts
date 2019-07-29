@@ -8,4 +8,5 @@
 PUBLIC_IP=`curl ipecho.net/plain`
 PASSWORD=`cat ~/.dyndns_password`
 
+sleep 60s # dyndns.service is started by the OS before the network interface is configured.
 curl "https://dynamicdns.park-your-domain.com/update?host=minecraft&domain=deltaidea.com&password=$PASSWORD&ip=$PUBLIC_IP"
