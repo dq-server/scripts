@@ -52,6 +52,8 @@ ls -lhAF ~/minecraft-backups
 scp -r -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com:~/minecraft-backups/backup-0 ./world-backup
 ```
 
+P.S. Ключ `minecraft-ec2.pem` приложен в Trello.
+
 ## Крон и автозапуск после ребута
 
 На сервере есть три сервиса systemctl: для Майнкрафта, для HTTP сервера карты, для DynDNS. Они все сами запускаются после ребута.
@@ -66,7 +68,7 @@ scp -r -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com:~/minecraft-
 
 ### Скачиваем мир со старого инстанса
 
-Нужно иметь ключ для входа в **старый** инстанс по SSH, чтобы скачать оттуда мир. Предположим, ключ локально лежит в `~/.ssh/minecraft-ec2.pem`.
+Нужно иметь ключ для входа в **старый** инстанс по SSH, чтобы скачать оттуда мир. Он приложен в Trello. Предположим, ключ локально лежит в `~/.ssh/minecraft-ec2.pem`.
 
 ```sh
 # Stop the server
