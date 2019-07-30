@@ -18,5 +18,7 @@ loglines = follow(logfile)
 for line in loglines:
   if "--render-map" in line:
     subprocess.call("/home/ec2-user/scripts/map_render.py", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-  else if "--system-shutdown" in line:
+  elif "--system-shutdown" in line:
     subprocess.call("/home/ec2-user/scripts/system_safe_shutdown.sh", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  elif "--test" in line:
+    subprocess.call("screen -S minecraft -X stuff \"/say Command listener active.$(printf \\\\r)\"", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
