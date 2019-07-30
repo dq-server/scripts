@@ -4,4 +4,4 @@
 
 # Stop the static HTTP server for the Overviewer map.
 
-screen -S map -X stuff "^C"
+screen -S map -X quit
