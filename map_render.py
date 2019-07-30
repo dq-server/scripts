@@ -27,11 +27,11 @@ SSH_OPTIONS = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/
 def runOnRemote(commandString):
   return runLocally(f"ssh {SSH_OPTIONS} ec2-user@{instanceAddress} {commandString}")
 
-def syncToRemote(localPath, remotePath):
-  return runLocally(f"rsync -e \"ssh {SSH_OPTIONS}\" -a -r --progress --delete {localPath} ec2-user@{instanceAddress}:{remotePath}")
+def copyToRemote(localPath, remotePath):
+  return runLocally(f"scp -r -p {SSH_OPTIONS} {localPath} ec2-user@{instanceAddress}:{remotePath}")
 
 def syncFromRemote(remotePath, localPath):
-  return runLocally(f"rsync -e \"ssh {SSH_OPTIONS}\" -a -r --progress --delete ec2-user@{instanceAddress}:{remotePath} {localPath}")
+  return runLocally(f"rsync -e \"ssh {SSH_OPTIONS}\" -a -r --delete ec2-user@{instanceAddress}:{remotePath} {localPath}")
 
 if len(getInstances()) > 0:
   runLocally("screen -S minecraft -X stuff \"/say Unable to render the map. Previous render isn't finished.$(printf \\\\r)\"")
@@ -55,21 +55,22 @@ runLocally("~/scripts/minecraft_backup.sh")
 
 runLocally("screen -S minecraft -X stuff \"/say Copying the latest backup to the rendering VM...$(printf \\\\r)\"")
 print("Copying the latest backup to the renderer instance...")
-syncToRemote("~/minecraft-backups/backup-0", "~/world-backup")
+copyToRemote("~/minecraft-backups/backup-0", "~/world-backup")
 
+runLocally("sudo systemctl stop map") # We've crashed once on this copying step, let's see if this helps.
 runLocally("screen -S minecraft -X stuff \"/say Copying the old map to the rendering VM...$(printf \\\\r)\"")
 print("Copying previous render to the renderer instance...")
-syncToRemote("~/overviewer/map", "~/previous-render")
+copyToRemote("~/overviewer/map", "~/previous-render")
 
 runLocally("screen -S minecraft -X stuff \"/say Starting rendering, this may take 30-60 minutes...$(printf \\\\r)\"")
 print("Initiating render procedure...")
-syncToRemote("~/scripts/map_render_remote_script.sh", "~/")
+copyToRemote("~/scripts/map_render_remote_script.sh", "~/")
 runOnRemote("~/map_render_remote_script.sh")
 
 runLocally("screen -S minecraft -X stuff \"/say Copying the newly rendered map to the server...$(printf \\\\r)\"")
 print("Copying rendered map to the server instance...")
-syncFromRemote("~/overviewer/map/", "~/overviewer/map")
-runLocally("sudo systemctl start map") # in case the HTTP server crashed
+syncFromRemote("~/overviewer/map", "~/overviewer")
+runLocally("sudo systemctl start map")
 
 runLocally("screen -S minecraft -X stuff \"/say Killing the rendering VM...$(printf \\\\r)\"")
 print("Terminating the renderer instance...")
