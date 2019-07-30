@@ -4,16 +4,6 @@
 
 import os, sys, subprocess, time
 
-def runLocally(commandString):
-  stdoutForBytes = os.fdopen(sys.stdout.fileno(), 'wb', closefd=False)
-  p = subprocess.Popen(commandString, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-  output = b""
-  for line in p.stdout:
-    output += line
-    stdoutForBytes.write(line)
-    stdoutForBytes.flush()
-  return output
-
 def follow(f):
   f.seek(0,2)
   while True:
@@ -28,3 +18,5 @@ loglines = follow(logfile)
 for line in loglines:
   if "--render-map" in line:
     subprocess.call("/home/ec2-user/scripts/map_render.py", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+  else if "--system-shutdown" in line:
+    subprocess.call("/home/ec2-user/scripts/system_safe_shutdown.sh", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

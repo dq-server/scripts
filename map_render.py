@@ -6,8 +6,9 @@
 
 import os, sys, subprocess, time, json
 
+stdoutForBytes = os.fdopen(sys.stdout.fileno(), 'wb', closefd=False)
+
 def runLocally(commandString):
-  stdoutForBytes = os.fdopen(sys.stdout.fileno(), 'wb', closefd=False)
   p = subprocess.Popen(commandString, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
   output = b""
   for line in p.stdout:
