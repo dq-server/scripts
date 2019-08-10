@@ -9,10 +9,8 @@ server_idle_minutes=0
 while true; do
   if [ $( get_number_of_players ) == '0' ]; then
     ((server_idle_minutes++))
-    echo "Idle = $server_idle_minutes"
   else
     server_idle_minutes=0
-    echo "Someone's playing"
   fi
 
   # Shut down after 15 minutes of inactivity.
