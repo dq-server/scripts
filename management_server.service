@@ -1,0 +1,12 @@
+[Unit]
+Description=HTTP API Service
+
+[Service]
+Type=oneshot
+User=ec2-user
+Group=ec2-user
+ExecStart=/home/ec2-user/scripts/management_server_start.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
