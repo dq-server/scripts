@@ -2,4 +2,4 @@
 
 # USAGE: ./management_server_start.sh
 
-screen -dm -L -S management_server ~/scripts/management_server.py
+sudo screen -dm -S management_server /home/ec2-user/scripts/management_server.py

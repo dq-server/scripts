@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, subprocess, time, json, urllib.request
+import os, sys, subprocess, time, json, urllib.request, ssl
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 def runLocally(commandString):
@@ -18,7 +18,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     self.send_header('Content-type','text/json')
     self.end_headers()
     if self.path == "/minecraft-status":
-      status = runLocally("~/scripts/minecraft_get_status.sh")
+      status = runLocally("/home/ec2-user/scripts/minecraft_get_status.sh")
       self.wfile.write(bytes(str(status, 'utf-8'), 'utf-8'))
     if self.path == "/map-status":
       response = urllib.request.urlopen("http://127.0.0.1/overviewer.js")
@@ -29,6 +29,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 def run():
   print('Starting API server...')
   httpd = HTTPServer(('0.0.0.0', 5000), RequestHandler)
+  httpd.socket = ssl.wrap_socket (httpd.socket,
+    keyfile="/etc/letsencrypt/live/minecraft.deltaidea.com/privkey.pem",
+    certfile="/etc/letsencrypt/live/minecraft.deltaidea.com/fullchain.pem", server_side=True)
   print('Running API server...')
   httpd.serve_forever()
 
@@ -36,3 +39,5 @@ try:
   run()
 except Exception as e:
   print(e)
+
+from http.server import HTTPServer, BaseHTTPRequestHandler
