@@ -5,9 +5,11 @@
 # Tell the Minecraft server to save the world and then copy it.
 
 screen -S minecraft -X stuff "/say Saving the world...$(printf \\r)"
-screen -S minecraft -X stuff "/save-all$(printf \\r)"
-sleep 2s
+
 screen -S minecraft -X stuff "/save-off$(printf \\r)"
+sleep 2s
+
+screen -S minecraft -X stuff "/save-all$(printf \\r)"
 sleep 2s
 
 # Rotate 10 backups by deleting the oldest one and shifting the rest.
