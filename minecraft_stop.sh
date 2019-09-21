@@ -5,7 +5,6 @@
 # Stop the Minecraft server if it's running using `screen`.
 
 screen -S minecraft -X stuff "/say The server will be stopped in 10 seconds!$(printf \\r)"
-screen -S minecraft_shutdown_when_idle -X quit
 sleep 10s
 screen -S minecraft_watch_commands -X quit
 screen -S minecraft -X stuff "/stop$(printf \\r)"
