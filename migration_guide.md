@@ -67,8 +67,10 @@ sudo yum install -y certbot
 # Domain names: minecraft.deltaidea.com
 sudo certbot certonly --standalone
 
-echo "0 * * * * ec2-user /home/ec2-user/scripts/minecraft_backup.sh" > crontab
-echo "0 0,12 * * * root python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew" | sudo tee -a /etc/crontab > /dev/null
+crontab -e # initialize crontab for user by saving an empty file (:wq)
+sudo crontab -e # initialize crontab for root as well
+echo "0 * * * * /home/ec2-user/scripts/minecraft_backup.sh" | crontab -
+echo "0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew" | sudo crontab -
 
 sudo cp ./scripts/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
