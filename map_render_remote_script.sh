@@ -11,7 +11,7 @@ sudo yum update -y >/dev/null 2>&1
 sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm >/dev/null 2>&1
 sudo yum install -y gcc python36 python36-devel python36-pip python36-pillow python36-pillow-devel python36-numpy >/dev/null 2>&1
 # Downloading Overviewer
-wget -O overviewer-source.tar.gz https://github.com/overviewer/Minecraft-Overviewer/archive/1b85e478f55932aad8312fb49daa818e9b258b05.tar.gz >/dev/null 2>&1
+wget -O overviewer-source.tar.gz https://github.com/deltaidea/Minecraft-Overviewer/archive/polygon.tar.gz >/dev/null 2>&1
 tar xvzf overviewer-source.tar.gz >/dev/null 2>&1
 rm overviewer-source.tar.gz >/dev/null 2>&1
 mv Minecraft-Overviewer* overviewer
