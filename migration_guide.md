@@ -67,11 +67,6 @@ sudo yum install -y certbot
 # Domain names: minecraft.deltaidea.com
 sudo certbot certonly --standalone
 
-crontab -e # initialize crontab for user by saving an empty file (:wq)
-sudo crontab -e # initialize crontab for root as well
-echo "0 * * * * /home/ec2-user/scripts/minecraft_backup.sh" | crontab -
-echo "0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew" | sudo crontab -
-
 sudo cp ./scripts/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 
@@ -80,3 +75,24 @@ sudo systemctl enable --now minecraft
 sudo systemctl enable --now map
 sudo systemctl enable --now management_api
 ```
+
+## Setting up cron jobs
+
+Open up the cron job list for the current user (`ec2-user`) like this: `EDITOR=nano crontab -e`, and add two backup jobs:
+
+```text
+0 * * * * /home/ec2-user/scripts/minecraft_backup.sh
+30 0 * * 1 /home/ec2-user/scripts/minecraft_backup_to_glacier.sh
+```
+
+The press `Ctrl+O` to save and `Ctrl+X` to exit.
+
+Add LetsEncrypt certificate renewal job with sudo by running `sudo EDITOR=nano crontab -e` and adding:
+
+```text
+0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew
+```
+
+You should see `crontab: installing new crontab` both times after saving and exiting.
+
+To learn more about cron scheduling, see [Wikipedia](https://en.wikipedia.org/wiki/Cron).

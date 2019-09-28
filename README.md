@@ -1,43 +1,53 @@
-# Техническая документация по серверу Майнкрафта
+# DQ Minecraft Server tech docs
 
-Сервер крутится в [AWS EC2](https://aws.amazon.com/ec2/) в инстансе _t3a.medium_:
+The server is running on [AWS EC2](https://aws.amazon.com/ec2/) in a dedicated _t3a.medium_ instance:
 
 - [Amazon Linux 2](https://aws.amazon.com/amazon-linux-2/)
 - 2-thread 2.5 GHz
 - 4 GB RAM
 - 100 GB SSD
-- Физически мы в зоне _eu-central-1a_, во Франкфурте
+- Physically in _eu-central-1a_ zone, that's in Frankfurt
 
-Мир весит 600 MB, веб-карта – 12 GB. Плюс 10 бэкапов мира. Места должно хватить надолго.
+The world is 700 MB in size, the map is 12 GB. Plus we store 10 last hourly world backups on-site.
+100 GB of space should be plenty for a while.
 
-Биллинг AWS идёт в сторону @deltaidea.
+AWS billing is managed by @deltaidea.
 
-## Рендер карты
+## Map rendering
 
-Достаточно написать в чате в игре: `--render-map` и подождать. В чате должны появляться логи.
-Если нет никакого отклика, проверь сервер (`screen -ls` должно иметь `minecraft_watch_commands` в списке) или напиши в Trello.
+Enter `--render-map` in the game chat and wait for a while. You'll see progress messages in the chat.
 
-Рендер занимает 10 минут. Работает этот скрипт так:
+If there're no automated messages, you're not alone, this happens from time to time. Message @deltaidea or fix it yourself:
 
-- Создаёт новый, гораздо более мощный инстанс (через API AWS).
-- Делает бэкап мира и кидает его в инстанс для рендера.
-- Устанавливает там Overviewer и качает туда конфиг из https://github.com/dq-server/overviewer-config
-- Рендерит карту (это самый долгий шаг)
-- Копирует её по сети обратно на инстанс с Майнкрафтом
-- Уничтожает инстанс для рендера, чтобы не тратить деньги
+- Download the SSH key from Trello (see the tech details card) and save it to `~/.ssh`
+- Log into the VM using `ssh -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com`
+- Run `screen -S minecraft_watch_commands -X quit` to kill the command detection loop
+- Run `screen -dmS minecraft_watch_commands ~/scripts/minecraft_watch_commands.py` to restart it
+- Quit the VM using `exit`
+- Try writing `--render-map` in the game chat again
 
-## Включение и выключение сервера
+It takes about 10-15 minutes to render the map. Here's what the rendering script does specifically:
 
-- Чтобы безопасно выключить инстанс, напиши в чате: `--system-shutdown`.
-- Чтобы включить сервер обратно, зайди на https://manage.minecraft.deltaidea.com и введи ключ из Trello.
+- Spins up a separate insanely powerful EC2 instance using AWS API
+- Makes a world backup and copies it over to the renderer instance.
+- Installs Overviewer over there and downloads our map config: https://github.com/dq-server/overviewer-config
+- Renders the map (this step takes 8-12 minutes)
+- Syncs the map to the main instance
+- Terminates the rendering instance because it costs $5 an hour to run
 
-## Бэкапы
+## Shutting down and restarting the server
 
-Мир бэкапится каждый час в соседнюю папку прямо на инстансе. Хранятся только последние 10 бэкапов.
+- To safely shut down the server, enter `--system-shutdown` in the game chat.
+- To start the server, open https://manage.minecraft.deltaidea.com and enter the access key from Trello.
 
-Возможно, стоит настроить бэкапы в AWS S3, но пока их нету.
+## Backups
 
-Чтобы восстановиться из бэкапа, нужно залогиниться в инстанс (`ssh -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com`) и выполнить:
+We're running two backup strategies:
+
+- Hourly backups on-site - to a folder next to the Minecraft server. Only the last 10 hourly backups are stored.
+- Weekly backups off-site - to AWS Glacier.
+
+To recover from an hourly backup, log into the server (`ssh -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com`) and run:
 
 ```sh
 # Look at the dates and choose a suitable backup
@@ -46,39 +56,37 @@ ls -lhAF ~/minecraft-backups
 ~/scripts/minecraft_restore.sh 5
 ```
 
-Можно скачать себе последний бэкап, если хочется. Нужно выполнить это на своей машине:
+You can also download an hourly backup to your PC by running the following command on your machine:
 
 ```sh
 scp -r -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com:~/minecraft-backups/backup-0 ./world-backup
 ```
 
-P.S. Ключ `minecraft-ec2.pem` приложен в Trello.
+## Cron and autorun
 
-## Крон и автозапуск после ребута
+We have three `systemctl` services running on the server: one for Minecraft, an HTTP server for the map, and one for DynDNS updating. They all start automatically after a reboot.
 
-На сервере есть три сервиса systemctl: для Майнкрафта, для HTTP сервера карты, для DynDNS. Они все сами запускаются после ребута.
+`minecraft.service` also spawns a separate process that watches game logs to respond to our custom commands described above.
 
-Сервис `minecraft.service` спавнит ещё один процесс для прослушки логов чата, чтобы откликаться на наши кастомные команды.
-
-Есть два правила crontab: каждый час делать бэкап мира и два раза в сутки пытаться обновить сертификат SSL от LetsEncrypt для нашего мелкого API. См. описание ниже и выше и конкретный код в `./system_init_instance.sh`.
+There're three cron jobs: two for backups and another one for LetsEncrypt cert refreshing for our management API.
 
 ## HTTP Management API
 
-На сервере крутится примитивный самодельный HTTP сервер `management_api.py`. Он висит в автозапуске как сервис `systemctl`, см. `management_api.service`.
+The server has a custom little HTTP API, see `management_api.py`. It runs as a `systemctl` service, see `management_api.service`. It's available at https://minecraft.deltaidea.com:5000
 
-Этот HTTP сервер используется в [manage.minecraft.deltaidea.com](https://manage.minecraft.deltaidea.com), чтобы узнавать статус Майнкрафта. Общаться с сервером Майнкрафта можно только голыми TCP пакетами, а в браузере JavaScript может посылать только пакеты в обёртке HTTP или WebSockets. Раз домен `minecraft.deltaidea.com` прокинут на машину с Майнкрафтом ради самой игры, мы просто запускаем API на соседнем порту: https://minecraft.deltaidea.com:5000.
+This API is used by [manage.minecraft.deltaidea.com](https://manage.minecraft.deltaidea.com) to get Minecraft status. Minecraft only has TCP API, and JavaScript in browsers doesn't allow to send raw TCP packets. So in order to see Minecraft status on the page we have to get it from some kind of a backend. That's why we have this Python script.
 
-Есть два ендпоинта:
+There're two endpoints:
 
-- `GET /minecraft-status` возвращает JSON с версией игры и списком игроков. Под капотом вызывает `./minecraft_get_status.sh`.
-- `GET /map-status` возвращает `{"status": 200}` на основе запроса к файлу `127.0.0.1/overviewer.js`, который должен существовать, если на сервере запущен HTTP сервер карты.
+- `GET /minecraft-status` returns JSON with the game version and a list of players online. It calls `./minecraft_get_status.sh` internally to get this info.
+- `GET /map-status` returns `{"status": 200}` after making a request to `127.0.0.1/overviewer.js` which should be successful if the map isn't down.
 
-Никакой аутентификации пока нету, хотя было бы неплохо прикрутить ради потенциальных кнопок рендера карты и выключения машины.
+There's no authentication at this point, though it would be neat to have some kind of access control for potential future features like server shutdown or map refreshing.
 
 ### SSL
 
-Так как [manage.minecraft.deltaidea.com](https://manage.minecraft.deltaidea.com) открывается по HTTPS, из JS на той странице нельзя делать нешифрованные запросы. Соответственно, чтобы стучаться в Management API, последнему нужен валидный SSL сертификат. Для этого используется [Let's Encrypt](https://letsencrypt.org). **Перед переездом нужно обязательно сделать бэкап папки `/etc/letsencrypt`.** Так было сказано при первой установке их CLI. Наверняка без бэкапа будет сложно или невозможно сгенерить новый сертификат для того же домена.
+Because [manage.minecraft.deltaidea.com](https://manage.minecraft.deltaidea.com) uses HTTPS, JavaScript on that page can't make unencrypted HTTP requests. So to make requests to the management API, it has to have SSL enabled. We're using [Let's Encrypt](https://letsencrypt.org) for that. You don't have to back up any credentials or anything, this is just FYI. See [Migration guide](migration_guide.md) for more info about how it's installed.
 
-## Запуск инстанса с нуля
+## Migrating to another machine
 
-Если придётся поменять тип инстанса или зону хостинга, или вовсе съехать из AWS, иструкция по переезду в [migration_guide.md](migration_guide.md)
+If there's ever a need to migrate to a new machine, we've documented the installation process in [`migration_guide.md`](migration_guide.md).
