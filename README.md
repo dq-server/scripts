@@ -45,7 +45,7 @@ It takes about 10-15 minutes to render the map. Here's what the rendering script
 We're running two backup strategies:
 
 - Hourly backups on-site - to a folder next to the Minecraft server. Only the last 10 hourly backups are stored.
-- Weekly backups off-site - to AWS Glacier.
+- Weekly backups off-site - to AWS Glacier. They're stored forever.
 
 To recover from an hourly backup, log into the server (`ssh -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com`) and run:
 
@@ -61,6 +61,8 @@ You can also download an hourly backup to your PC by running the following comma
 ```sh
 scp -r -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com:~/minecraft-backups/backup-0 ./world-backup
 ```
+
+To recover from a weekly off-site backup, message @deltaidea.
 
 ## Cron and autorun
 
