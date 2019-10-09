@@ -83,7 +83,7 @@ You can also download an hourly backup to your PC by running the following comma
 scp -r -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com:~/minecraft-backups/backup-0 ./world-backup
 ```
 
-To recover from a weekly off-site backup, message @deltaidea.
+To recover from a weekly off-site backup, message @deltaidea. Guide: https://docs.aws.amazon.com/cli/latest/reference/glacier/initiate-job.html
 
 ## Shutting down and restarting the server
 
