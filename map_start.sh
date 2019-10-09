@@ -6,3 +6,5 @@
 
 cd ~/overviewer/map
 screen -dmS map sudo python3 -m http.server 80
+screen -S map -X logfile ~/map_process.log
+screen -S map -X log

@@ -8,4 +8,4 @@ screen -S minecraft -X stuff "/say The server will be stopped in 10 seconds!$(pr
 sleep 10s
 screen -S minecraft_watch_commands -X quit
 screen -S minecraft -X stuff "/stop$(printf \\r)"
-sleep 10s # It can take some time to save the world and exit.
+sleep 20s # It can take some time to save the world and exit.
