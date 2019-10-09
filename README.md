@@ -22,7 +22,12 @@ If there're no automated messages, you're not alone, this happens from time to t
 - Download the SSH key from Trello (see the tech details card) and save it to `~/.ssh`
 - Log into the VM using `ssh -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com`
 - Run `screen -S minecraft_watch_commands -X quit` to kill the command detection loop
-- Run `screen -dmS minecraft_watch_commands ~/scripts/minecraft_watch_commands.py` to restart it
+- Run this to restart it:
+  ```sh
+  screen -dmS minecraft_watch_commands ~/scripts/minecraft_watch_commands.py
+  screen -S minecraft_watch_commands -X logfile ~/minecraft_watch_commands_process.log
+  screen -S minecraft_watch_commands -X log
+  ```
 - Quit the VM using `exit`
 - Try writing `--render-map` in the game chat again
 
@@ -35,10 +40,26 @@ It takes about 10-15 minutes to render the map. Here's what the rendering script
 - Syncs the map to the main instance
 - Terminates the rendering instance because it costs $5 an hour to run
 
-## Shutting down and restarting the server
+## Logs and troubleshooting
 
-- To safely shut down the server, enter `--system-shutdown` in the game chat.
-- To start the server, open https://manage.minecraft.deltaidea.com and enter the access key from Trello.
+The following log files may be helpful if something goes wrong:
+
+- `~/minecraft/logs/latest.log`
+- `~/minecraft_process.log`
+- `~/minecraft_watch_commands_process.log`
+- `~/map_process.log`
+- `~/management_api_process.log`
+
+Relevant commands:
+
+- `tail --lines 50 <file>` - shows the last 50 lines of a file. Log files can have thousands of lines, usually you only need to see the latest events.
+- `ls -lhAF <directory>` - shows directory contents with human-readable sizes, including hidden files.
+- `scp -r -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com:~/minecraft/logs ./` - run this locally on your machine to download all MC logs.
+- `sudo systemctl stop map && sudo systemctl start map` - restart the map HTTP server if you can't load the map in your browser.
+- `sudo systemctl stop minecraft && sudo systemctl start minecraft` - restart the Minecraft server if something goes horribly wrong.
+- `uptime` - see VM uptime and average CPU load for the last 1, 5, 15 minutes.
+- `top` - task manager. Quit by pressing `q`.
+- `last` - shows login history. See who logged into the VM before you and when.
 
 ## Backups
 
@@ -63,6 +84,11 @@ scp -r -i ~/.ssh/minecraft-ec2.pem ec2-user@minecraft.deltaidea.com:~/minecraft-
 ```
 
 To recover from a weekly off-site backup, message @deltaidea.
+
+## Shutting down and restarting the server
+
+- To safely shut down the server, enter `--system-shutdown` in the game chat.
+- To start the server, open https://manage.minecraft.deltaidea.com and enter the access key from Trello.
 
 ## Cron and autorun
 
