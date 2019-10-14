@@ -25,13 +25,13 @@ def getInstances():
 SSH_OPTIONS = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/minecraft-ec2.pem"
 
 def runOnRemote(commandString):
-  return runLocally(f"ssh {SSH_OPTIONS} -o LogLevel=ERROR ec2-user@{instanceAddress} {commandString}", logToMinecraft=True)
+  return runLocally(f"ssh {SSH_OPTIONS} -o LogLevel=ERROR ubuntu@{instanceAddress} \"{commandString}\"", logToMinecraft=True)
 
 def copyToRemote(localPath, remotePath):
-  return runLocally(f"scp -r -p {SSH_OPTIONS} -o LogLevel=ERROR {localPath} ec2-user@{instanceAddress}:{remotePath} >/dev/null 2>&1")
+  return runLocally(f"scp -r -p {SSH_OPTIONS} -o LogLevel=ERROR {localPath} ubuntu@{instanceAddress}:\"{remotePath}\" >/dev/null 2>&1")
 
 def syncFromRemote(remotePath, localPath):
-  return runLocally(f"rsync -e \"ssh {SSH_OPTIONS}\" -a -r --delete ec2-user@{instanceAddress}:{remotePath} {localPath} >/dev/null 2>&1")
+  return runLocally(f"rsync -e \"ssh {SSH_OPTIONS}\" -a -r --delete ubuntu@{instanceAddress}:\"{remotePath}\" {localPath} >/dev/null 2>&1")
 
 if len(getInstances()) > 0:
   runLocally("screen -S minecraft -X stuff \"/say Unable to render the map. Previous render isn't finished.$(printf \\\\r)\"")
@@ -41,7 +41,7 @@ if len(getInstances()) > 0:
 try:
   print("Spinning up a rendering VM (c5.24xlarge)...")
   runLocally("screen -S minecraft -X stuff \"/say Spinning up a new virtual machine (96 CPU cores)...$(printf \\\\r)\"")
-  runLocally("aws ec2 run-instances --image-id ami-0cc293023f983ed53 --count 1 --instance-type c5.24xlarge --key-name minecraft-ec2 --security-group-ids sg-099005316791a75b8 --subnet-id subnet-ff30fe95 --region eu-central-1 --block-device-mappings '[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"VolumeSize\":20,\"VolumeType\":\"gp2\",\"DeleteOnTermination\":true}}]' --tag-specifications 'ResourceType=instance,Tags=[{Key=purpose,Value=minecraft}]' 'ResourceType=volume,Tags=[{Key=purpose,Value=minecraft}]'")
+  runLocally("aws ec2 run-instances --image-id ami-0cc0a36f626a4fdf5 --count 1 --instance-type c5.24xlarge --key-name minecraft-ec2 --security-group-ids sg-099005316791a75b8 --subnet-id subnet-ff30fe95 --region eu-central-1 --block-device-mappings '[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":30,\"VolumeType\":\"gp2\",\"DeleteOnTermination\":true}}]' --tag-specifications 'ResourceType=instance,Tags=[{Key=purpose,Value=minecraft}]' 'ResourceType=volume,Tags=[{Key=purpose,Value=minecraft}]'")
 
   print("Waiting 30 seconds for the VM to initialize...")
   time.sleep(30)
