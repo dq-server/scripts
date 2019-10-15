@@ -58,7 +58,7 @@ Run the following on the new remote:
 
 ```sh
 sudo yum update -y
-sudo yum install -y java-1.8.0 nc epel-release python36 python36-pip
+sudo yum install -y java-1.8.0 nc epel-release python36 python36-pip nginx
 sudo amazon-linux-extras install epel -y
 sudo yum install -y certbot
 
@@ -67,12 +67,19 @@ sudo yum install -y certbot
 # Domain names: minecraft.deltaidea.com
 sudo certbot certonly --standalone
 
-sudo cp ./scripts/*.service /etc/systemd/system/
+sudo ln -s ~/scripts/map_nginx.conf /etc/nginx/conf.d/map.conf
+# https://stackoverflow.com/a/43686446
+sudo chmod +x ~/..
+sudo chmod +x ~/
+sudo chmod +x ~/overviewer
+sudo chmod +x ~/overviewer/map
+
+sudo cp ~/scripts/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 
 sudo systemctl enable --now dyndns
 sudo systemctl enable --now minecraft
-sudo systemctl enable --now map
+sudo systemctl enable --now nginx
 sudo systemctl enable --now management_api
 ```
 
@@ -90,7 +97,7 @@ The press `Ctrl+O` to save and `Ctrl+X` to exit.
 Add LetsEncrypt certificate renewal job with sudo by running `sudo EDITOR=nano crontab -e` and adding:
 
 ```text
-0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew
+0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew --post-hook "systemctl reload nginx"
 ```
 
 You should see `crontab: installing new crontab` both times after saving and exiting.
