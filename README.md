@@ -92,7 +92,7 @@ To recover from a weekly off-site backup, message @deltaidea. Guide: https://doc
 
 ## Cron and autorun
 
-We have three `systemctl` services running on the server: one for Minecraft, an HTTP server for the map, and one for DynDNS updating. They all start automatically after a reboot.
+We have three `systemctl` services running on the server: one for Minecraft, Nginx server for the map, and one for DynDNS updating. They all start automatically after a reboot.
 
 `minecraft.service` also spawns a separate process that watches game logs to respond to our custom commands described above.
 

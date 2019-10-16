@@ -60,7 +60,6 @@ try:
   copyToRemote("~/scripts/map_render_remote_script.sh", "~/")
   runOnRemote("~/map_render_remote_script.sh")
 
-  runLocally("sudo systemctl stop map") # We've crashed once on this copying step, let's see if this helps.
   runLocally("screen -S minecraft -X stuff \"/say Copying the newly rendered map to the server...$(printf \\\\r)\"")
   print("Copying rendered map to the server instance...")
   syncFromRemote("~/overviewer/map", "~/overviewer")
@@ -73,7 +72,6 @@ except Exception as e:
     runLocally("screen -S minecraft -X stuff \"/say End of stacktrace.$(printf \\\\r)\"")
 
 finally:
-  runLocally("sudo systemctl start map")
   runLocally("screen -S minecraft -X stuff \"/say Killing the rendering VM...$(printf \\\\r)\"")
   print("Terminating the renderer instance...")
   runLocally(f"aws ec2 terminate-instances --region eu-central-1 --instance-ids {instanceInfo['InstanceId']}")
