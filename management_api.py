@@ -21,7 +21,7 @@ class RequestHandler(BaseHTTPRequestHandler):
       status = runLocally("/home/ec2-user/scripts/minecraft_get_status.sh")
       self.wfile.write(bytes(str(status, 'utf-8'), 'utf-8'))
     if self.path == "/map-status":
-      response = urllib.request.urlopen("http://127.0.0.1/overviewer.js")
+      response = urllib.request.urlopen("https://minecraft.deltaidea.com/overviewer.js")
       status = response.status
       self.wfile.write(bytes('{{"status":{}}}'.format(status), 'utf-8'))
     return
