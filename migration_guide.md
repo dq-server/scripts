@@ -50,6 +50,7 @@ scp -r -i ~/.ssh/minecraft-ec2.pem ./* ec2-user@<NEW_VM>:~/scripts/
 scp -r -i ~/.ssh/minecraft-ec2.pem ~/.ssh/minecraft-ec2.pem ec2-user@<NEW_VM>:~/.ssh/
 
 scp -r -i ~/.ssh/minecraft-ec2.pem ~/.dyndns_password ec2-user@<NEW_VM>:~/
+scp -r -i ~/.ssh/minecraft-ec2.pem ~/.api_key ec2-user@<NEW_VM>:~/
 ```
 
 ## Starting up services on the new machine
