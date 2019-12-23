@@ -98,7 +98,7 @@ The press `Ctrl+O` to save and `Ctrl+X` to exit.
 Add LetsEncrypt certificate renewal job with sudo by running `sudo EDITOR=nano crontab -e` and adding:
 
 ```text
-0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew --post-hook "systemctl reload nginx"
+0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && systemctl stop nginx && certbot renew --post-hook "systemctl start nginx"
 ```
 
 You should see `crontab: installing new crontab` both times after saving and exiting.
