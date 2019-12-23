@@ -5,7 +5,7 @@
 # Start the Minecraft server in detached mode.
 
 cd ~/minecraft
-screen -dmS minecraft java -Xms3G -Xmx3G -jar server-1.14.4.jar
+screen -dmS minecraft java -Xms3G -Xmx3G -jar server-1.15.1.jar
 screen -S minecraft -X logfile ~/minecraft_process.log
 screen -S minecraft -X log
 
