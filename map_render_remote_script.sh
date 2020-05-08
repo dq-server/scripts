@@ -10,7 +10,7 @@ sudo apt-get update >/dev/null 2>&1
 sudo apt-get install -y build-essential python3-pillow python3-dev python3-numpy >/dev/null 2>&1
 
 # Downloading Overviewer
-wget -O overviewer-source.tar.gz https://github.com/deltaidea/Minecraft-Overviewer/archive/polygon.tar.gz >/dev/null 2>&1
+wget -O overviewer-source.tar.gz https://github.com/overviewer/Minecraft-Overviewer/archive/dc6f8cfcbd1056facac369152e88fb24bab86cc9.tar.gz >/dev/null 2>&1
 tar xvzf overviewer-source.tar.gz >/dev/null 2>&1
 rm overviewer-source.tar.gz >/dev/null 2>&1
 mv Minecraft-Overviewer* overviewer
@@ -22,7 +22,7 @@ python3 setup.py build >/dev/null 2>&1
 echo "Renderer: Downloading Minecraft textures and our map config..."
 
 # Downloading the Minecraft client for textures
-wget -O client.jar https://overviewer.org/textures/1.14.4 >/dev/null 2>&1
+wget -O client.jar https://overviewer.org/textures/1.15.2 >/dev/null 2>&1
 
 # These variables are used in config.py, see https://github.com/dq-server/overviewer-config
 export MINECRAFT_WORLD_DIR="~/world-backup"
